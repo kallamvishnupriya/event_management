@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}{{ action }} Event – EventHub{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card p-4">
+        <h3 class="fw-bold mb-4">{{ action }} Event</h3>
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">Event Title *</label>
+              <input type="text" name="title" class="form-control" value="{{ event.title|default:'' }}" required/>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Description *</label>
+              <textarea name="description" class="form-control" rows="5" required>{{ event.description|default:'' }}</textarea>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label fw-semibold">Category</label>
+              <select name="category" class="form-select">
+                <option value="">-- Select Category --</option>
+                {% for cat in categories %}
+                <option value="{{ cat.pk }}" {% if event.category_id == cat.pk %}selected{% endif %}>{{ cat.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label fw-semibold">Status</label>
+              <select name="status" class="form-select">
+                <option value="published" {% if event.status == 'published' %}selected{% endif %}>Published</option>
+                <option value="draft"     {% if event.status == 'draft' %}selected{% endif %}>Draft</option>
+                <option value="cancelled" {% if event.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Venue *</label>
+              <input type="text" name="venue" class="form-control" value="{{ event.venue|default:'' }}" required/>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label fw-semibold">City *</label>
+              <input type="text" name="city" class="form-control" value="{{ event.city|default:'' }}" required/>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label fw-semibold">Date & Time *</label>
+              <input type="datetime-local" name="date" class="form-control"
+                     value="{% if event.date %}{{ event.date|date:'Y-m-d' }}T{{ event.date|date:'H:i' }}{% endif %}" required/>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label fw-semibold">Price (₹)</label>
+              <input type="number" name="price" class="form-control" value="{{ event.price|default:'0' }}" min="0" step="0.01"/>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label fw-semibold">Capacity</label>
+              <input type="number" name="capacity" class="form-control" value="{{ event.capacity|default:'100' }}" min="1"/>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Event Banner Image</label>
+              {% if event.banner %}
+                <div class="mb-2"><img src="{{ event.banner.url }}" style="height:100px; border-radius:8px;" alt="Current banner"/></div>
+              {% endif %}
+              <input type="file" name="banner" class="form-control" accept="image/*"/>
+            </div>
+            <div class="col-12 d-flex gap-2 mt-2">
+              <button type="submit" class="btn btn-primary px-4">{{ action }} Event</button>
+              <a href="{% url 'organizer_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}My Bookings – EventHub{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">My Bookings</h2>
+      <p class="text-muted mb-0">Welcome back, {{ user.first_name|default:user.username }}!</p>
+    </div>
+    <a href="{% url 'home' %}" class="btn btn-primary"><i class="bi bi-search me-1"></i>Browse Events</a>
+  </div>
+
+  {% if bookings %}
+    <div class="row g-4">
+      {% for booking in bookings %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+          {% if booking.event.banner %}
+            <img src="{{ booking.event.banner.url }}" class="card-img-top" style="height:160px; object-fit:cover;" alt="{{ booking.event.title }}"/>
+          {% else %}
+            <div style="height:160px; background:linear-gradient(135deg,#4f46e5,#7c3aed); display:flex; align-items:center; justify-content:center;">
+              <i class="bi bi-calendar-event text-white" style="font-size:3rem;"></i>
+            </div>
+          {% endif %}
+          <div class="card-body">
+            <span class="badge {% if booking.status == 'confirmed' %}bg-success{% else %}bg-danger{% endif %} mb-2">
+              {{ booking.get_status_display }}
+            </span>
+            <h5 class="card-title fw-bold">{{ booking.event.title }}</h5>
+            <p class="text-muted mb-1"><i class="bi bi-calendar3 me-1"></i>{{ booking.event.date|date:"D, d M Y, g:i A" }}</p>
+            <p class="text-muted mb-1"><i class="bi bi-geo-alt me-1"></i>{{ booking.event.venue }}, {{ booking.event.city }}</p>
+            <p class="text-muted mb-2"><i class="bi bi-ticket me-1"></i>{{ booking.quantity }} ticket(s) — ₹{{ booking.total_price }}</p>
+          </div>
+          <div class="card-footer bg-white d-flex gap-2">
+            <a href="{% url 'event_detail' booking.event.pk %}" class="btn btn-outline-primary btn-sm flex-grow-1">View Event</a>
+            {% if booking.status == 'confirmed' %}
+              {% if not booking.event.reviews.filter %}
+                <a href="{% url 'write_review' booking.event.pk %}" class="btn btn-outline-warning btn-sm">Review</a>
+              {% endif %}
+              <a href="{% url 'cancel_booking' booking.pk %}" class="btn btn-outline-danger btn-sm">Cancel</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-5">
+      <i class="bi bi-calendar-x" style="font-size:4rem; color:#cbd5e1;"></i>
+      <h4 class="mt-3 text-muted">No bookings yet</h4>
+      <p class="text-muted">Browse events and book your first ticket!</p>
+      <a href="{% url 'home' %}" class="btn btn-primary">Browse Events</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

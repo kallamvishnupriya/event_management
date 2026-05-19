@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Write Review – {{ event.title }}{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card p-4">
+        <h3 class="fw-bold mb-1">Write a Review</h3>
+        <p class="text-muted mb-4">{{ event.title }}</p>
+        <form method="POST">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Rating</label>
+            <div class="d-flex gap-3">
+              {% for i in "12345" %}
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="rating" id="r{{ forloop.counter }}" value="{{ forloop.counter }}" required/>
+                <label class="form-check-label" for="r{{ forloop.counter }}">{{ forloop.counter }} ⭐</label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Comment (optional)</label>
+            <textarea name="comment" class="form-control" rows="4" placeholder="Share your experience..."></textarea>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary px-4">Submit Review</button>
+            <a href="{% url 'event_detail' event.pk %}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

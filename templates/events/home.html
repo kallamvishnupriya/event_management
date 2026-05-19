@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}EventHub – Discover Events{% endblock %}
+{% block content %}
+
+<!-- Hero -->
+<div style="background:linear-gradient(135deg,#4f46e5,#7c3aed); color:#fff; padding:4rem 0;">
+  <div class="container text-center">
+    <h1 class="fw-bold mb-2" style="font-size:clamp(2rem,5vw,3.2rem);">Discover Amazing Events</h1>
+    <p class="mb-4" style="font-size:1.1rem; opacity:.85;">Find and book events happening near you</p>
+    <form method="GET" action="{% url 'home' %}">
+      <div class="row justify-content-center g-2">
+        <div class="col-md-5">
+          <input type="text" name="q" value="{{ query }}" class="form-control form-control-lg" placeholder="Search events..."/>
+        </div>
+        <div class="col-md-2">
+          <input type="text" name="city" value="{{ selected_city }}" class="form-control form-control-lg" placeholder="City"/>
+        </div>
+        <div class="col-md-2">
+          <select name="category" class="form-select form-select-lg">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+            <option value="{{ cat.slug }}" {% if selected_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-1">
+          <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold">Go</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Events -->
+<div class="container py-5">
+  {% if query or selected_city or selected_category %}
+  <div class="mb-3">
+    <span class="text-muted">Showing results
+      {% if query %}for "<strong>{{ query }}</strong>"{% endif %}
+      {% if selected_city %}in <strong>{{ selected_city }}</strong>{% endif %}
+    </span>
+    <a href="{% url 'home' %}" class="ms-2 btn btn-sm btn-outline-secondary">Clear</a>
+  </div>
+  {% endif %}
+
+  {% if page_obj %}
+  <div class="row g-4">
+    {% for event in page_obj %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100">
+        {% if event.banner %}
+          <img src="{{ event.banner.url }}" class="card-img-top" style="height:180px; object-fit:cover;" alt="{{ event.title }}"/>
+        {% else %}
+          <div style="height:180px; background:linear-gradient(135deg,#4f46e5,#7c3aed); display:flex; align-items:center; justify-content:center;">
+            <i class="bi bi-calendar-event text-white" style="font-size:3rem;"></i>
+          </div>
+        {% endif %}
+        <div class="card-body d-flex flex-column">
+          {% if event.category %}
+          <span class="badge-category mb-2 d-inline-block">{{ event.category.name }}</span>
+          {% endif %}
+          <h5 class="card-title fw-bold">{{ event.title }}</h5>
+          <p class="text-muted small mb-1"><i class="bi bi-calendar3 me-1"></i>{{ event.date|date:"D, d M Y" }}</p>
+          <p class="text-muted small mb-1"><i class="bi bi-geo-alt me-1"></i>{{ event.venue }}, {{ event.city }}</p>
+          <p class="text-muted small mb-2"><i class="bi bi-people me-1"></i>{{ event.seats_left }} seats left</p>
+          <div class="mt-auto d-flex justify-content-between align-items-center">
+            <span class="fw-bold text-primary">{% if event.price == 0 %}Free{% else %}₹{{ event.price }}{% endif %}</span>
+            <a href="{% url 'event_detail' event.pk %}" class="btn btn-primary btn-sm">View Details</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+  <nav class="mt-5 d-flex justify-content-center">
+    <ul class="pagination">
+      {% if page_obj.has_previous %}
+      <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query }}&city={{ selected_city }}&category={{ selected_category }}">Previous</a></li>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+      <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+        <a class="page-link" href="?page={{ num }}&q={{ query }}&city={{ selected_city }}&category={{ selected_category }}">{{ num }}</a>
+      </li>
+      {% endfor %}
+      {% if page_obj.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query }}&city={{ selected_city }}&category={{ selected_category }}">Next</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-calendar-x" style="font-size:4rem; color:#cbd5e1;"></i>
+    <h4 class="mt-3 text-muted">No events found</h4>
+    <p class="text-muted">Try a different search or check back later.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

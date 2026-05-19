@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}{{ event.title }} – EventHub{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    <!-- Left -->
+    <div class="col-lg-8">
+      {% if event.banner %}
+        <img src="{{ event.banner.url }}" class="img-fluid rounded-3 mb-4" style="width:100%; max-height:380px; object-fit:cover;" alt="{{ event.title }}"/>
+      {% endif %}
+      {% if event.category %}
+        <span class="badge-category mb-2 d-inline-block">{{ event.category.name }}</span>
+      {% endif %}
+      <h1 class="fw-bold mb-3">{{ event.title }}</h1>
+      <div class="d-flex flex-wrap gap-3 mb-4 text-muted">
+        <span><i class="bi bi-calendar3 me-1"></i>{{ event.date|date:"D, d M Y, g:i A" }}</span>
+        <span><i class="bi bi-geo-alt me-1"></i>{{ event.venue }}, {{ event.city }}</span>
+        <span><i class="bi bi-person me-1"></i>By {{ event.organizer.get_full_name|default:event.organizer.username }}</span>
+      </div>
+      <h5 class="fw-bold">About this Event</h5>
+      <p style="white-space:pre-line; line-height:1.8;">{{ event.description }}</p>
+
+      <!-- Reviews -->
+      <hr class="my-4"/>
+      <h5 class="fw-bold mb-3">Reviews ({{ reviews.count }})</h5>
+      {% if reviews %}
+        {% for review in reviews %}
+        <div class="card mb-3 p-3">
+          <div class="d-flex justify-content-between mb-1">
+            <strong>{{ review.user.get_full_name|default:review.user.username }}</strong>
+            <span>
+              {% for i in "12345" %}
+                {% if forloop.counter <= review.rating %}⭐{% endif %}
+              {% endfor %}
+            </span>
+          </div>
+          <p class="mb-0 text-muted">{{ review.comment }}</p>
+          <small class="text-muted">{{ review.created_at|date:"d M Y" }}</small>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted">No reviews yet. Be the first to review!</p>
+      {% endif %}
+
+      {% if user.is_authenticated and user_booked and not user_reviewed %}
+        <a href="{% url 'write_review' event.pk %}" class="btn btn-outline-warning mt-2">Write a Review</a>
+      {% endif %}
+    </div>
+
+    <!-- Right: Booking Card -->
+    <div class="col-lg-4">
+      <div class="card p-4 sticky-top" style="top:80px;">
+        <h4 class="fw-bold mb-1">{% if event.price == 0 %}Free{% else %}₹{{ event.price }}{% endif %}</h4>
+        <p class="text-muted mb-3">per ticket</p>
+        <div class="mb-2"><i class="bi bi-people me-1"></i><strong>{{ event.seats_left }}</strong> seats left</div>
+        <div class="mb-3"><i class="bi bi-calendar3 me-1"></i>{{ event.date|date:"d M Y, g:i A" }}</div>
+        <div class="mb-4"><i class="bi bi-geo-alt me-1"></i>{{ event.venue }}, {{ event.city }}</div>
+
+        {% if user.is_authenticated %}
+          {% if user.organizer_profile %}
+            <div class="alert alert-info py-2 mb-0">Organizers cannot book tickets.</div>
+          {% elif user_booked %}
+            <div class="alert alert-success py-2 mb-0">✅ You have booked this event!</div>
+          {% elif event.is_available %}
+            <a href="{% url 'book_event' event.pk %}" class="btn btn-primary w-100 btn-lg">Book Now</a>
+          {% else %}
+            <button class="btn btn-secondary w-100" disabled>Sold Out</button>
+          {% endif %}
+        {% else %}
+          <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary w-100">Login to Book</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
