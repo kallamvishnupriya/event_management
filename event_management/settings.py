@@ -15,7 +15,7 @@ DEBUG = config(
     cast=lambda v: v.lower() == "true"
 )
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*").split(",")
+ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS",
     default="*"
 ).split(",")
